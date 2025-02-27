@@ -6,13 +6,14 @@ import Underline from "@tiptap/extension-underline"
 import TextAlign from "@tiptap/extension-text-align"
 import { Toggle } from "@/components/ui/toggle"
 import { Bold, Italic, UnderlineIcon, List, ListOrdered, AlignLeft, AlignCenter, AlignRight } from "lucide-react"
+import dynamic from 'next/dynamic'
 
 interface TipTapEditorProps {
   content: string
   onChange: (content: string) => void
 }
 
-export default function TipTapEditor({ content, onChange }: TipTapEditorProps) {
+const TipTapEditorComponent = ({ content, onChange }: TipTapEditorProps) => {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -25,6 +26,16 @@ export default function TipTapEditor({ content, onChange }: TipTapEditorProps) {
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML())
     },
+    editorProps: {
+      attributes: {
+        class: 'focus:outline-none'
+      }
+    },
+    editable: true,
+    injectCSS: false,
+    parseOptions: {
+      preserveWhitespace: true
+    }
   })
 
   if (!editor) {
@@ -107,4 +118,10 @@ export default function TipTapEditor({ content, onChange }: TipTapEditorProps) {
     </div>
   )
 }
+
+const TipTapEditor = dynamic(() => Promise.resolve(TipTapEditorComponent), {
+  ssr: false
+})
+
+export default TipTapEditor
 
