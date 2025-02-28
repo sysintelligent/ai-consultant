@@ -7,6 +7,7 @@ import TextAlign from "@tiptap/extension-text-align"
 import { Toggle } from "@/components/ui/toggle"
 import { Bold, Italic, UnderlineIcon, List, ListOrdered, AlignLeft, AlignCenter, AlignRight } from "lucide-react"
 import dynamic from 'next/dynamic'
+import { useEffect } from "react"
 
 interface TipTapEditorProps {
   content: string
@@ -22,7 +23,7 @@ const TipTapEditorComponent = ({ content, onChange }: TipTapEditorProps) => {
         types: ["heading", "paragraph"],
       }),
     ],
-    content,
+    content: content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML())
     },
@@ -37,6 +38,12 @@ const TipTapEditorComponent = ({ content, onChange }: TipTapEditorProps) => {
       preserveWhitespace: true
     }
   })
+
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content)
+    }
+  }, [content, editor])
 
   if (!editor) {
     return <div>Loading editor...</div>
