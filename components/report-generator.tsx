@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import DOMPurify from 'dompurify'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -25,8 +26,9 @@ export default function ReportGenerator() {
 
   const handleGenerateReport = () => {
     const report = generateReport(topic)
-    setGeneratedReport(report)
-    setEditorContent(report)
+    const sanitizedReport = DOMPurify.sanitize(report)
+    setGeneratedReport(sanitizedReport)
+    setEditorContent(sanitizedReport)
   }
 
   const handleSubmit = async () => {
@@ -47,11 +49,13 @@ export default function ReportGenerator() {
       }
 
       const data = await response.json()
-      setEditorContent(data.html)
+      // Sanitize HTML content before setting it to state
+      const sanitizedHtml = DOMPurify.sanitize(data.html)
+      setEditorContent(sanitizedHtml)
     } catch (error) {
       console.error('Error:', error)
       setError('Failed to analyze the URL. Please try again.')
-      setEditorContent('<p>Failed to analyze the URL. Please try again.</p>')
+      setEditorContent(DOMPurify.sanitize('<p>Failed to analyze the URL. Please try again.</p>'))
     } finally {
       setIsLoading(false)
     }
@@ -126,7 +130,7 @@ export default function ReportGenerator() {
                 <TabsContent value="preview" className="min-h-[500px]">
                   <div
                     className="prose max-w-none dark:prose-invert"
-                    dangerouslySetInnerHTML={{ __html: editorContent }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(editorContent) }}
                   />
                 </TabsContent>
               </Tabs>
