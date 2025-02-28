@@ -21,6 +21,7 @@ export default function ReportGenerator() {
   const [url, setUrl] = useState("")
   const [instructions, setInstructions] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleGenerateReport = () => {
     const report = generateReport(topic)
@@ -28,15 +29,32 @@ export default function ReportGenerator() {
     setEditorContent(report)
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsLoading(true)
-    // Simulate processing the URL and instructions
-    setTimeout(() => {
+    setError(null)
+    
+    try {
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url, instructions }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze')
+      }
+
+      const data = await response.json()
+      setEditorContent(data.html)
+    } catch (error) {
+      console.error('Error:', error)
+      setError('Failed to analyze the URL. Please try again.')
+      setEditorContent('<p>Failed to analyze the URL. Please try again.</p>')
+    } finally {
       setIsLoading(false)
-      // For demo purposes, we'll just add a simple message to the editor
-      const content = `<h2>Analysis of: ${url}</h2><p>Following your instructions: ${instructions}</p><p>This is where the analysis based on the URL and instructions would appear. In a real implementation, this would fetch and analyze the content from the provided URL according to the given instructions.</p>`
-      setEditorContent(content)
-    }, 1500)
+    }
   }
 
   return (
@@ -60,6 +78,11 @@ export default function ReportGenerator() {
                 </TabsList>
                 <TabsContent value="editor" className="space-y-4">
                   <div className="space-y-4 p-4 border rounded-md bg-muted/30">
+                    {error && (
+                      <div className="text-sm text-red-500 mb-2">
+                        {error}
+                      </div>
+                    )}
                     <div className="space-y-2">
                       <label htmlFor="url" className="text-sm font-medium">
                         URL to Analyze
@@ -83,8 +106,19 @@ export default function ReportGenerator() {
                         rows={3}
                       />
                     </div>
-                    <Button onClick={handleSubmit} disabled={!url.trim() || isLoading} className="w-full">
-                      {isLoading ? "Processing..." : "Analyze URL"}
+                    <Button 
+                      onClick={handleSubmit} 
+                      disabled={!url.trim() || isLoading} 
+                      className="w-full"
+                    >
+                      {isLoading ? (
+                        <span className="flex items-center gap-2">
+                          <span className="animate-spin">⏳</span> 
+                          Analyzing...
+                        </span>
+                      ) : (
+                        "Analyze URL"
+                      )}
                     </Button>
                   </div>
                   <TipTapEditor content={editorContent} onChange={setEditorContent} />
