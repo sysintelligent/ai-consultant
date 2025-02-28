@@ -17,7 +17,6 @@ type Topic = "History" | "Technology" | "Science" | "Literature" | "Philosophy"
 export default function ReportGenerator() {
   const [topic, setTopic] = useState<Topic>("Technology")
   const [editorContent, setEditorContent] = useState("")
-  const [generatedReport, setGeneratedReport] = useState("")
   const [url, setUrl] = useState("")
   const [instructions, setInstructions] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -25,7 +24,6 @@ export default function ReportGenerator() {
 
   const handleGenerateReport = () => {
     const report = generateReport(topic)
-    setGeneratedReport(report)
     setEditorContent(report)
   }
 

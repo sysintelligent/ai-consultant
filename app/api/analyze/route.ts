@@ -27,6 +27,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ html: mockAnalysis })
   } catch (error) {
+    console.error('Analysis error:', error)
     return NextResponse.json({ error: 'Failed to analyze' }, { status: 500 })
   }
 } 
